@@ -14,8 +14,14 @@ var ComponentGenerator = yeoman.generators.NamedBase.extend({
   init: function () {
     var codeLanguage = this.usesTypeScript ? 'TypeScript' : 'JavaScript';
     console.log('Creating component \'' + this.name + '\' (' + codeLanguage + ')...');
+    if (this.name.lastIndexOf("/") == 0) {
+        this.path = this.name;
+    } else {
+        this.path = this.name.substring(0, this.name.lastIndexOf("/"));
+        this.name = this.name.substring(this.name.lastIndexOf("/")+1, this.name.length);
+    }
     this.componentName = this.name;
-    this.dirname = 'src/components/' + this._.dasherize(this.name) + '/';
+    this.dirname = 'src/components/' + this._.dasherize(this.path) + '/';
     this.filename = this._.dasherize(this.name);
     this.viewModelClassName = this._.classify(this.name);
   },
@@ -37,7 +43,7 @@ var ComponentGenerator = yeoman.generators.NamedBase.extend({
 
         var token = '// [Scaffolded component registrations will be inserted here. To retain this feature, don\'t remove this comment.]',
             regex = new RegExp('^(\\s*)(' + token.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&') + ')', 'm'),
-            modulePath = 'components/' + this.filename + '/' + this.filename,
+            modulePath = 'components/' + this.path + '/' + this.filename,
             lineToAdd = 'ko.components.register(\'' + this.filename + '\', { require: \'' + modulePath + '\' });',
             newContents = existingContents.replace(regex, '$1' + lineToAdd + '\n$&');
         fs.writeFile(startupFile, newContents);
